@@ -31,7 +31,7 @@ export function BackgroundStorm({ isPlayingAudio = false, onToggleSound }: Backg
       {/* Three.js Live WebGL Scene */}
       <iframe
         ref={iframeRef}
-        src="/background-scene.html"
+        src={`${import.meta.env.BASE_URL}background-scene.html`}
         title="Three.js Storm Sea Background"
         className="w-full h-full border-0 absolute inset-0 object-cover scale-[1.02]"
         tabIndex={-1}

@@ -18,7 +18,7 @@ export function Footer() {
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  e.currentTarget.src = '/logo.png';
+                  e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
                 }}
               />
             </div>
