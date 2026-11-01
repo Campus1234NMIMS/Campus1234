@@ -130,10 +130,25 @@ import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 // =====================================================================
 
 const COARSE = matchMedia('(pointer: coarse)').matches;
-const LOW = COARSE || Math.min(screen.width, screen.height) < 700;
-const Q = LOW
-  ? { gridX: 150, gridY: 230, waves: 12, detail: 6, cloudDiv: 4, cloudSteps: 24, fogDiv: 2.5, beamSteps: 6, rain: 7000, spray: 6000, climax: 3800, bloom: 5, budget: 1.1e6, dpr: 1.5, msaa: 0, noise3: 64 }
-  : { gridX: 300, gridY: 460, waves: 16, detail: 10, cloudDiv: 3, cloudSteps: 40, fogDiv: 2, beamSteps: 10, rain: 15000, spray: 14000, climax: 9000, bloom: 6, budget: 2.6e6, dpr: 1.5, msaa: 4, noise3: 96 };
+const LOW = COARSE || Math.min(screen.width, screen.height) < 800;
+const Q = {
+  gridX: LOW ? 130 : 180,
+  gridY: LOW ? 180 : 250,
+  waves: LOW ? 10 : 14,
+  detail: LOW ? 5 : 8,
+  cloudDiv: LOW ? 4 : 3.2,
+  cloudSteps: LOW ? 18 : 24,
+  fogDiv: LOW ? 2.8 : 2.2,
+  beamSteps: LOW ? 5 : 8,
+  rain: LOW ? 4000 : 7000,
+  spray: LOW ? 3500 : 5500,
+  climax: LOW ? 2500 : 3800,
+  bloom: LOW ? 4 : 5,
+  budget: LOW ? 0.9e6 : 1.4e6,
+  dpr: Math.min(1.15, window.devicePixelRatio || 1),
+  msaa: 0,
+  noise3: 64
+};
 
 // ---- small helpers ----
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
@@ -1812,9 +1827,9 @@ function bellsOf(c) {
 
 // ---- runtime ----
 const AUD = { ctx: null };
-let PREP = false;
-function audioPrep() { if (!PREP) { PREP = true; ajob(soundCore()); } }
-setTimeout(audioPrep, 2500);
+let PREP = true;
+function audioPrep() { PREP = true; }
+// setTimeout(audioPrep, 2500); - disabled for Siren ambient audio engine
 function audioAttach(ctx) {
   if (AUD.ctx === ctx) return;
   if (AUD.ctx) audioForget();
@@ -2069,22 +2084,43 @@ function draw() {
   postRender(clock);
 }
 if (SOFT) while (clock < 35.2) update(1 / 30);
+let fpsCounter = 60;
+let lastFpsReport = performance.now();
+window.addEventListener('message', (e) => {
+  if (e.data === 'TURBO_MODE_ON') {
+    PERF.scale = 0.72;
+    resize();
+  } else if (e.data === 'TURBO_MODE_OFF') {
+    PERF.scale = 1.0;
+    resize();
+  }
+});
+
 function adapt(real) {
   if (real > 0.25 || SOFT) return;
   PERF.acc += real; PERF.n++; PERF.cool -= real;
-  if (PERF.acc < 2) return;
+  if (PERF.n >= 15) {
+    const currentFps = Math.min(120, Math.max(15, Math.round(PERF.n / PERF.acc)));
+    fpsCounter = currentFps;
+    if (performance.now() - lastFpsReport > 1200) {
+      lastFpsReport = performance.now();
+      try { window.parent.postMessage({ type: 'STORM_FPS_REPORT', fps: fpsCounter }, '*'); } catch (err) {}
+    }
+  }
+  if (PERF.acc < 1.5) return;
   const avg = PERF.acc / PERF.n; PERF.acc = 0; PERF.n = 0;
   if (PERF.cool > 0) return;
   let k = 1;
-  if (avg > 1 / 38 && PERF.scale > 0.55) k = 0.86; else if (avg < 1 / 57 && PERF.scale < 1) k = 1.08; else return;
-  PERF.scale = clamp(PERF.scale * k, 0.55, 1); PERF.cool = 4; resize();
+  if (avg > 1 / 45 && PERF.scale > 0.6) k = 0.88; else if (avg < 1 / 58 && PERF.scale < 1) k = 1.06; else return;
+  PERF.scale = clamp(PERF.scale * k, 0.6, 1); PERF.cool = 3; resize();
 }
 renderer.setAnimationLoop(() => {
+  if (document.hidden) return; // Zero GPU work when tab is in background
   const now = performance.now(), real = (now - last) / 1000; last = now;
   adapt(real);
   let dt = Math.min(real, 1 / 20);
   if (SOFT) dt = 0;
-    update(dt);
+  update(dt);
   draw();
 });
 </script>
