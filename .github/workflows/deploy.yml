@@ -3,7 +3,7 @@ name: Deploy Campus1234
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "master"]
   workflow_dispatch:
 
 permissions:
@@ -28,10 +28,13 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build website
-        run: npm run build
+        run: |
+          npm run build
+          if [ -f CNAME ]; then cp CNAME dist/CNAME; fi
+          touch dist/.nojekyll
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
