@@ -11,12 +11,14 @@ import { ProcessCapsules } from './components/ProcessCapsules';
 import { EmailContactCapsule } from './components/EmailContactCapsule';
 import { FaqCapsules } from './components/FaqCapsules';
 import { Footer } from './components/Footer';
+import { CampusCraftChatbot } from './components/CampusCraftChatbot';
 import { PackageId } from './types';
 import { sirenAudio } from './utils/sirenAudioEngine';
 
 export default function App() {
   const [selectedPackage, setSelectedPackage] = useState<PackageId>('pro');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -48,11 +50,12 @@ export default function App() {
         onToggleSound={handleToggleSound}
       />
 
-      {/* Floating Apple Glass Top Navigation Bar */}
+      {/* Floating Apple Glass Top Navigation Bar with AI Chatbot Access */}
       <Navbar
         onContactClick={() => scrollToSection('contact')}
         isPlayingAudio={isPlayingAudio}
         onToggleSound={handleToggleSound}
+        onOpenChatbot={() => setIsChatbotOpen(true)}
       />
 
       {/* Main Content Flow */}
@@ -95,6 +98,13 @@ export default function App() {
 
       {/* Apple Glass Capsule Footer */}
       <Footer />
+
+      {/* Embedded Client-Side CampusCraft AI Chatbot */}
+      <CampusCraftChatbot
+        isOpen={isChatbotOpen}
+        onClose={() => setIsChatbotOpen(false)}
+        onOpen={() => setIsChatbotOpen(true)}
+      />
     </div>
   );
 }

@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Mail, ArrowRight, Menu, X, Volume2, VolumeX, Sparkles, Music } from 'lucide-react';
+import { Mail, ArrowRight, Menu, X, Volume2, VolumeX, Sparkles, Music, Bot } from 'lucide-react';
 
 interface NavbarProps {
   onContactClick: () => void;
   isPlayingAudio?: boolean;
   onToggleSound?: () => void;
+  onOpenChatbot?: () => void;
 }
 
-export function Navbar({ onContactClick, isPlayingAudio, onToggleSound }: NavbarProps) {
+export function Navbar({ onContactClick, isPlayingAudio, onToggleSound, onOpenChatbot }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollTo = (id: string) => {
@@ -117,10 +118,23 @@ export function Navbar({ onContactClick, isPlayingAudio, onToggleSound }: Navbar
             </button>
           )}
 
+          {onOpenChatbot && (
+            <button
+              type="button"
+              onClick={onOpenChatbot}
+              className="px-3.5 py-1.5 rounded-full border border-cyan-400/50 bg-gradient-to-r from-cyan-500/20 via-sky-500/20 to-purple-500/20 text-cyan-200 hover:text-white hover:border-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:shadow-[0_0_20px_rgba(6,182,212,0.45)] transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold active:scale-95 shrink-0"
+              title="Open CampusCraft AI Chatbot"
+            >
+              <Bot className="w-4 h-4 text-cyan-300 animate-pulse" />
+              <span>Ask AI Bot</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onContactClick}
-            className="px-5 py-2 text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-300 via-white to-cyan-200 rounded-full hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 active:scale-95"
+            className="px-4 sm:px-5 py-2 text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-300 via-white to-cyan-200 rounded-full hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 active:scale-95"
           >
             <Mail className="w-3.5 h-3.5" />
             <span>Email Desk</span>
@@ -141,6 +155,19 @@ export function Navbar({ onContactClick, isPlayingAudio, onToggleSound }: Navbar
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden mt-2 glass-capsule rounded-3xl p-4 border border-white/20 shadow-2xl flex flex-col gap-3 text-sm text-slate-200 animate-in fade-in slide-in-from-top-2 duration-200">
+          {onOpenChatbot && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenChatbot();
+              }}
+              className="text-left px-3 py-2 rounded-xl bg-cyan-500/15 border border-cyan-400/30 text-cyan-200 font-semibold flex items-center gap-2 hover:bg-cyan-500/25 transition-colors"
+            >
+              <Bot className="w-4 h-4 text-cyan-300" />
+              <span>Ask CampusCraft AI Bot</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => scrollTo('our-work')}
